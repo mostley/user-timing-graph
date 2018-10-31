@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>User Timing Api Graph</title>
+  <style>
+    canvas {
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 100vh;
+      width: 80vw;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chart-container">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <script src="http://www.chartjs.org/dist/2.7.3/Chart.bundle.js"></script>
+
+  <script>
+    function dynamicColor() {
+      var r = Math.floor(Math.random() * 255);
+      var g = Math.floor(Math.random() * 255);
+      var b = Math.floor(Math.random() * 255);
+      return "rgb(" + r + "," + g + "," + b + ")";
+    };
+
+    function getEntries() {
+      if (!window.location.hash) {
+        throw new Error('no data given');
+      }
+      const hash = decodeURIComponent(window.location.hash.substr(1));
+      console.log(hash);
+
+      return JSON.parse(hash);
+      //performance.mark('test');
+      //return performance.getEntries();
+    }
+
+    function convertEntryToChartData(entry, i) {
+
+      console.log(entry.name, entry.startTime, entry.duration);
+      const color = dynamicColor();
+      if (entry.duration > 0) {
+        return {
+          label: entry.name,
+          backgroundColor: color,
+          borderColor: color,
+          fill: false,
+          borderWidth: 15,
+          pointRadius: 0,
+          data: [
+            {
+              x: entry.startTime,
+              y: i + 1
+            }, {
+              x: entry.startTime + entry.duration,
+              y: i + 1
+            }
+          ]
+        };
+      } else {
+        return {
+          label: entry.name,
+          backgroundColor: color,
+          borderColor: color,
+          fill: false,
+          pointRadius: 10,
+          data: [
+            {
+              x: entry.startTime,
+              y: i + 1
+            }
+          ]
+        };
+      }
+    }
+
+    function convertEntriesToChartData(entries) {
+      return entries.map(convertEntryToChartData);
+    }
+
+    window.onload = function () {
+      const entries = getEntries();
+      const data = {
+        datasets: convertEntriesToChartData(entries)
+      };
+      var ctx = document.getElementById('chart').getContext('2d');
+
+      Chart.plugins.register({
+        afterDatasetsDraw: function (chart) {
+          var ctx = chart.ctx;
+
+          chart.data.datasets.forEach(function (dataset, i) {
+            var meta = chart.getDatasetMeta(i);
+            if (!meta.hidden) {
+              // Draw the text in black, with the specified font
+              ctx.fillStyle = 'rgb(0, 0, 0)';
+
+              var fontSize = 16;
+              var fontStyle = 'normal';
+              var fontFamily = 'Helvetica Neue';
+              ctx.font = Chart.helpers.fontString(fontSize, fontStyle, fontFamily);
+
+              // Just naively convert to string for now
+              var dataString = dataset.label;
+              if (dataString.length > 50) {
+                dataString = dataString.substr(0, 50) + '...';
+              }
+
+              // Make sure alignment settings are correct
+              ctx.textAlign = 'right';
+              ctx.textBaseline = 'middle';
+
+              var padding = 10;
+              var position = meta.data[meta.data.length - 1].tooltipPosition();
+              ctx.fillText(dataString, position.x, position.y - (fontSize / 2) - padding);
+            }
+          });
+        }
+      });
+
+      var scatterChart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+          responsive: true,
+          legend: {
+            display: false
+          },
+          scales: {
+            xAxes: [{
+              type: 'linear',
+              position: 'bottom',
+              ticks: {
+                beginAtzero: true,
+                stepSize: 1
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display: false
+              },
+              ticks: {
+                beginAtZero: true,
+                stepSize: 1,
+                max: data.datasets.length + 1
+              }
+            }]
+          },
+          tooltips: {
+            intersect: false,
+            callbacks: {
+              label: function (tooltipItem, data) { return ''; }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
