@@ -91,7 +91,7 @@
       return entries.map(convertEntryToChartData);
     }
 
-    window.onload = function () {
+    function drawGraph() {
       const entries = getEntries();
       const data = {
         datasets: convertEntriesToChartData(entries)
@@ -167,6 +167,23 @@
           }
         }
       });
+    }
+    function drawError(error) {
+      document.querySelector('.chart-container').innerHTML =
+        '<h1 class="error">' + error + '</h1>';
+    }
+
+    window.onload = function () {
+      if (!window.location.hash || window.location.hash.length <= 1) {
+        drawError('No timing data found, please have a look at <a href="https://github.com/mostley/user-timing-graph">the readme</a> for help');
+        return;
+      }
+
+      try {
+        drawGraph();
+      } catch (ex) {
+        drawError('Failed to draw graph');
+      }
     }
   </script>
 </body>
