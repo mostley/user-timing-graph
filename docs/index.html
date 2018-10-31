@@ -41,16 +41,11 @@
         throw new Error('no data given');
       }
       const hash = decodeURIComponent(window.location.hash.substr(1));
-      console.log(hash);
 
       return JSON.parse(hash);
-      //performance.mark('test');
-      //return performance.getEntries();
     }
 
     function convertEntryToChartData(entry, i) {
-
-      console.log(entry.name, entry.startTime, entry.duration);
       const color = dynamicColor();
       if (entry.duration > 0) {
         return {
