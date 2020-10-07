@@ -60,6 +60,7 @@ class PerformanceDataVisualizer {
         }
         const hash = decodeURIComponent(window.location.hash.substr(1));
 
+        console.log(hash);
         return JSON.parse(hash);
     }
 
@@ -75,10 +76,10 @@ class PerformanceDataVisualizer {
                 pointRadius: 0,
                 data: [
                     {
-                        x: entry.startTime,
+                        x: entry.startTime / 1000,
                         y: i + 1
                     }, {
-                        x: entry.startTime + entry.duration,
+                        x: (entry.startTime + entry.duration) / 1000,
                         y: i + 1
                     }
                 ]
@@ -92,7 +93,7 @@ class PerformanceDataVisualizer {
                 pointRadius: 10,
                 data: [
                     {
-                        x: entry.startTime,
+                        x: entry.startTime / 1000,
                         y: i + 1
                     }
                 ]
@@ -193,12 +194,12 @@ class PerformanceDataVisualizer {
                                 label += ': ';
                             }
                             const value = parseFloat(tooltipItem.label!) || 0;
-                            label += Math.round(value);
-                            label += 'ms ';
+                            label += Math.round(value * 100) / 100;
+                            label += 's ';
                             if (dataPoint.data.length > 1) {
                                 let duration = dataPoint.data[1].x - dataPoint.data[0].x;
-                                duration = Math.round(duration);
-                                label += ` (duration: ${duration}ms)`;
+                                duration = Math.round(duration * 100) / 100;
+                                label += ` (duration: ${duration}s)`;
                             }
                             return label;
                         }
@@ -252,6 +253,7 @@ class PerformanceDataVisualizer {
         try {
             this.drawGraph();
         } catch (ex) {
+            console.error(ex);
             this.drawError('Failed to draw graph');
         }
     }
