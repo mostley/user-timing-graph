@@ -1,4 +1,5 @@
 import {Chart} from 'chart.js';
+import 'chartjs-plugin-zoom'
 
 function dynamicColor() {
     const r = Math.floor(Math.random() * 255);
@@ -15,6 +16,8 @@ class PerformanceDataVisualizer {
     private visualizeButton: HTMLButtonElement;
     private dataInputField: HTMLTextAreaElement;
     private entries: PerformanceEntry[] = [];
+    private resetZoomButton: HTMLButtonElement;
+    private chart?: Chart;
 
     constructor() {
         this.chartCanvas = document.getElementById('chart') as HTMLCanvasElement;
@@ -22,6 +25,8 @@ class PerformanceDataVisualizer {
         this.dataInputContainer = document.querySelector('.data-input-container') as HTMLDivElement;
         this.visualizeButton = document.querySelector('.visualize-button') as HTMLButtonElement;
         this.dataInputField = document.querySelector('#data-input-field') as HTMLTextAreaElement;
+        this.resetZoomButton = document.querySelector('#reset-zoom-button') as HTMLButtonElement;
+        this.resetZoomButton.addEventListener('click', this.onResetZoomClicked.bind(this));
 
         const ctx = this.chartCanvas.getContext('2d');
         if (!ctx) {
@@ -42,7 +47,7 @@ class PerformanceDataVisualizer {
             return;
         }
         if ((this.entries[0] as any).jsonPayload) {
-           this.entries = this.entries.map(e => (e as any).jsonPayload)
+            this.entries = this.entries.map(e => (e as any).jsonPayload)
         }
         this.setDataInputFieldVisibility(false);
 
@@ -100,7 +105,6 @@ class PerformanceDataVisualizer {
     }
 
     drawGraph() {
-        console.log('draw graph');
         const data = {
             datasets: this.convertEntriesToChartData(this.entries)
         };
@@ -123,9 +127,8 @@ class PerformanceDataVisualizer {
                         const fontFamily = 'Helvetica Neue';
                         ctx.font = Chart.helpers.fontString(fontSize, fontStyle, fontFamily);
 
-                        // Just naively convert to string for now
-                        let dataString = dataset.label;
-                        if (dataString && dataString.length > 50) {
+                        let dataString = dataset.label || '';
+                        if (dataString.length > 50) {
                             dataString = dataString.substr(0, 50) + '...';
                         }
 
@@ -134,18 +137,19 @@ class PerformanceDataVisualizer {
                         ctx.textBaseline = 'middle';
 
                         const padding = 10;
-                        // const position = meta.data[meta.data.length - 1].tooltipPosition();
-                        // ctx.fillText(dataString, position.x, position.y - (fontSize / 2) - padding);
+                        const position = (meta.data[meta.data.length - 1] as any).tooltipPosition();
+                        ctx.fillText(dataString, position.x, position.y - (fontSize / 2) - padding);
                     }
                 });
             }
         });
 
-        const scatterChart = new Chart(this.ctx, {
+        this.chart = new Chart(this.ctx, {
             type: 'line',
             data: data,
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 legend: {
                     display: false
                 },
@@ -171,8 +175,43 @@ class PerformanceDataVisualizer {
                 tooltips: {
                     intersect: false,
                     callbacks: {
-                        label: function (tooltipItem, data) {
+                        title: () => {
                             return '';
+                        },
+                        label: (tooltipItem) => {
+                            if (!tooltipItem.datasetIndex) {
+                                return '';
+                            }
+
+                            let dataPoint = data.datasets[tooltipItem.datasetIndex];
+                            if (!dataPoint) {
+                                return '';
+                            }
+                            let label = dataPoint.label;
+
+                            if (label) {
+                                label += ': ';
+                            }
+                            const value = parseFloat(tooltipItem.label!) || 0;
+                            label += Math.round(value);
+                            label += 'ms ';
+                            if (dataPoint.data.length > 1) {
+                                let duration = dataPoint.data[1].x - dataPoint.data[0].x;
+                                duration = Math.round(duration);
+                                label += ` (duration: ${duration}ms)`;
+                            }
+                            return label;
+                        }
+                    }
+                },
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true
+                        },
+                        zoom: {
+                            enabled: true,
+                            drag: false,
                         }
                     }
                 }
@@ -215,6 +254,13 @@ class PerformanceDataVisualizer {
         } catch (ex) {
             this.drawError('Failed to draw graph');
         }
+    }
+
+    private onResetZoomClicked() {
+        if (!this.chart) {
+            return;
+        }
+        (this.chart as any).resetZoom();
     }
 }
 

@@ -7,27 +7,35 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>User Timing Api Graph</title>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: calc(100vh - 20px);
+      width: 100vw;
+    }
+
     canvas {
-      -moz-user-select: none;
+      /*-moz-user-select: none;
       -webkit-user-select: none;
-      -ms-user-select: none;
+      -ms-user-select: none;*/
     }
 
     .chart-container {
       position: relative;
-      height: 100vh;
-      width: 80vw;
+      height: calc(100vh - 50px);
+      width: 100vw;
     }
 
     .data-input-container {
       height: 100vh;
-      width: 80vh;
+      width: 100vh;
     }
   </style>
 </head>
 
 <body>
   <div class="chart-container">
+    <button id="reset-zoom-button">Reset Zoom</button>
     <canvas id="chart"></canvas>
   </div>
 

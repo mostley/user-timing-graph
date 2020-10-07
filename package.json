@@ -22,7 +22,8 @@
   "homepage": "https://github.com/mostley/user-timing-graph#readme",
   "dependencies": {
     "@types/chart.js": "^2.9.25",
-    "chart.js": "^2.9.3"
+    "chart.js": "^2.9.3",
+    "chartjs-plugin-zoom": "^0.7.7"
   },
   "devDependencies": {
     "ts-loader": "^8.0.4",
