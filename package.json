@@ -1,0 +1,34 @@
+{
+  "name": "user-timing-graph",
+  "version": "1.0.0",
+  "description": "This is a small tool to visualize Performance Marks and Measures done with the Javascript [User Timing API](https://developer.mozilla.org/en-US/docs/Web/API/User_Timing_API).",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mostley/user-timing-graph.git"
+  },
+  "author": "Sven Hecht",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mostley/user-timing-graph/issues"
+  },
+  "homepage": "https://github.com/mostley/user-timing-graph#readme",
+  "dependencies": {
+    "@types/chart.js": "^2.9.25",
+    "chart.js": "^2.9.3",
+    "chartjs-plugin-zoom": "^0.7.7"
+  },
+  "devDependencies": {
+    "ts-loader": "^8.0.4",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  }
+}

@@ -7,180 +7,48 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>User Timing Api Graph</title>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: calc(100vh - 20px);
+      width: 100vw;
+    }
+
     canvas {
-      -moz-user-select: none;
+      /*-moz-user-select: none;
       -webkit-user-select: none;
-      -ms-user-select: none;
+      -ms-user-select: none;*/
     }
 
     .chart-container {
       position: relative;
+      height: calc(100vh - 50px);
+      width: 100vw;
+    }
+
+    .data-input-container {
       height: 100vh;
-      width: 80vw;
+      width: 100vh;
     }
   </style>
 </head>
 
 <body>
   <div class="chart-container">
+    <button id="reset-zoom-button">Reset Zoom</button>
     <canvas id="chart"></canvas>
   </div>
 
-  <script src="https://www.chartjs.org/dist/2.7.3/Chart.bundle.js"></script>
+  <div class="data-input-container" style="display: none">
+    <label for="data-input-field">Paste the Performance entries here:</label>
+    <br/>
+    <textarea id="data-input-field" rows="10" cols="50"></textarea>
+    <br/>
+    <button class="visualize-button">Visualize</button>
+  </div>
 
-  <script>
-    function dynamicColor() {
-      var r = Math.floor(Math.random() * 255);
-      var g = Math.floor(Math.random() * 255);
-      var b = Math.floor(Math.random() * 255);
-      return "rgb(" + r + "," + g + "," + b + ")";
-    };
-
-    function getEntries() {
-      if (!window.location.hash) {
-        throw new Error('no data given');
-      }
-      const hash = decodeURIComponent(window.location.hash.substr(1));
-
-      return JSON.parse(hash);
-    }
-
-    function convertEntryToChartData(entry, i) {
-      const color = dynamicColor();
-      if (entry.duration > 0) {
-        return {
-          label: entry.name,
-          backgroundColor: color,
-          borderColor: color,
-          fill: false,
-          borderWidth: 15,
-          pointRadius: 0,
-          data: [
-            {
-              x: entry.startTime,
-              y: i + 1
-            }, {
-              x: entry.startTime + entry.duration,
-              y: i + 1
-            }
-          ]
-        };
-      } else {
-        return {
-          label: entry.name,
-          backgroundColor: color,
-          borderColor: color,
-          fill: false,
-          pointRadius: 10,
-          data: [
-            {
-              x: entry.startTime,
-              y: i + 1
-            }
-          ]
-        };
-      }
-    }
-
-    function convertEntriesToChartData(entries) {
-      return entries.map(convertEntryToChartData);
-    }
-
-    function drawGraph() {
-      const entries = getEntries();
-      const data = {
-        datasets: convertEntriesToChartData(entries)
-      };
-      var ctx = document.getElementById('chart').getContext('2d');
-
-      Chart.plugins.register({
-        afterDatasetsDraw: function (chart) {
-          var ctx = chart.ctx;
-
-          chart.data.datasets.forEach(function (dataset, i) {
-            var meta = chart.getDatasetMeta(i);
-            if (!meta.hidden) {
-              // Draw the text in black, with the specified font
-              ctx.fillStyle = 'rgb(0, 0, 0)';
-
-              var fontSize = 16;
-              var fontStyle = 'normal';
-              var fontFamily = 'Helvetica Neue';
-              ctx.font = Chart.helpers.fontString(fontSize, fontStyle, fontFamily);
-
-              // Just naively convert to string for now
-              var dataString = dataset.label;
-              if (dataString.length > 50) {
-                dataString = dataString.substr(0, 50) + '...';
-              }
-
-              // Make sure alignment settings are correct
-              ctx.textAlign = 'right';
-              ctx.textBaseline = 'middle';
-
-              var padding = 10;
-              var position = meta.data[meta.data.length - 1].tooltipPosition();
-              ctx.fillText(dataString, position.x, position.y - (fontSize / 2) - padding);
-            }
-          });
-        }
-      });
-
-      var scatterChart = new Chart(ctx, {
-        type: 'line',
-        data: data,
-        options: {
-          responsive: true,
-          legend: {
-            display: false
-          },
-          scales: {
-            xAxes: [{
-              type: 'linear',
-              position: 'bottom',
-              ticks: {
-                beginAtzero: true,
-                stepSize: 1
-              }
-            }],
-            yAxes: [{
-              scaleLabel: {
-                display: false
-              },
-              ticks: {
-                beginAtZero: true,
-                stepSize: 1,
-                max: data.datasets.length + 1
-              }
-            }]
-          },
-          tooltips: {
-            intersect: false,
-            callbacks: {
-              label: function (tooltipItem, data) { return ''; }
-            }
-          }
-        }
-      });
-    }
-    function drawError(error) {
-      document.querySelector('.chart-container').innerHTML =
-        '<h1 class="error">' + error + '</h1>';
-    }
-
-    window.onload = function () {
-      if (!window.location.hash || window.location.hash.length <= 1) {
-        drawError('No timing data found, please have a look at <a href="https://github.com/mostley/user-timing-graph">the readme</a> for help');
-        return;
-      }
-
-      try {
-        drawGraph();
-      } catch (ex) {
-        drawError('Failed to draw graph');
-      }
-    }
-  </script>
+  <script>const exports = {};</script>
+  <script src="main.js"></script>
 </body>
 
 </html>
