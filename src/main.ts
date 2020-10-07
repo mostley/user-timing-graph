@@ -129,7 +129,7 @@ class PerformanceDataVisualizer {
 
                         let dataString = dataset.label || '';
                         if (dataString.length > 50) {
-                            dataString = dataString.substr(0, 50) + '...';
+                            return;
                         }
 
                         // Make sure alignment settings are correct
